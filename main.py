@@ -49,7 +49,7 @@ def auth():
     
     #req user auth begin
     auth_url = 'http://www.last.fm/api/auth/?' + 'api_key=' + api_key + '&token=' + token
-    print(auth_url)
+    #print(auth_url)
     br = mechanize.Browser(factory=mechanize.RobustFactory())
     br.set_handle_robots(False)
     br.open(auth_url)
@@ -57,10 +57,22 @@ def auth():
     br['username'] = ''
     br['password'] = ''
     res = br.submit()
+    #content = res.read()
+    #with open('mech_results.html', 'w') as f:
+    #    f.write(content)
+    #webbrowser.open('mech_results.html')
+    br.select_form(nr=2) 
+    res = br.submit()
     content = res.read()
     with open('mech_results.html', 'w') as f:
         f.write(content)
     webbrowser.open('mech_results.html')
+
+
+    #<form method="post" action="/api/grantaccess" style="margin-top: 14px"><input name="formtoken" type="hidden" value="ea5d8bd2522c48ef4c2c7bc21992cc5a4ef8dc58"/>            
+
+
+    #<input type="submit" class="button confirmButton" value="Yes, allow access">
 
     #request = mechanize.Request(auth_url)
     #response = mechanize.urlopen(request)
@@ -73,19 +85,15 @@ def auth():
     api_sig = hashlib.md5(api_sig_hash).hexdigest()
     url = rootApi + '?method=auth.getSession&api_key=' + api_key +  '&api_sig=' + api_sig + '&token=' + token
 
-    #<input type="submit" class="button confirmButton" value="Yes, allow access">
+    
+    
+    
+    
     f = open('auth', 'r')
     username = f.readline()
     password = f.readline()
     #print(url) 
     
-    
-    #login stuff
-    #<input type="text" id="username" name="username" class="LoginBox" style="width:98%;" value="" />
-    #<input type="password" id="password" name="password" value="" class="LoginBox" style="width:98%;" />
-
-
-    #<input type="submit" value="Come on in" name="login"/>
     
     #fetch web service session end
 #class user(self):
