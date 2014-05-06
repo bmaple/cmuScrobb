@@ -2,6 +2,9 @@
 import sys
 import urllib2
 import hashlib
+import json
+import webbrowser
+import mechanize
 #API Key: 242fedcf48db479f1584797a4e25d771
 #Secret: is f8365bed081c880685acad58866b4939
 
@@ -30,19 +33,61 @@ import hashlib
     #fetch a web service session
     #make authenticated web service calls
     #sign my calls
+#fix url encodes for url
 def auth():
     api_key = '242fedcf48db479f1584797a4e25d771'
     rootApi = 'http://ws.audioscrobbler.com/2.0/'
-
     #api_sig = md5('api_key'+api_key+'method' + 'auth.getSession' +'token')
+    
+    #get token begin
     url = rootApi + '?method=auth.gettoken&api_key=' + api_key + '&format=json'
-    #print(url)
-    tokenhHTTP = urllib2.urlopen(url)#gets auth from user
-    token = tokenhHTTP.read()
-    #urllib2.urlopen.close()
-    print(token)
-    #api_sig_hash = unicode('api_key' + api_key + 'method' + 'auth.getToken', "utf-8")
-    #api_sig = hashlib.md5(api_sig_hash).hexdigest()
+    tokenReqJson = urllib2.urlopen(url)#gets auth from user
+    tokenJsonString = tokenReqJson.read()
+    tokenJson = json.loads(tokenJsonString)
+    token = tokenJson['token']
+    #get token end
+    
+    #req user auth begin
+    auth_url = 'http://www.last.fm/api/auth/?' + 'api_key=' + api_key + '&token=' + token
+    print(auth_url)
+    br = mechanize.Browser(factory=mechanize.RobustFactory())
+    br.set_handle_robots(False)
+    br.open(auth_url)
+    br.select_form(nr=1)
+    br['username'] = ''
+    br['password'] = ''
+    res = br.submit()
+    content = res.read()
+    with open('mech_results.html', 'w') as f:
+        f.write(content)
+    webbrowser.open('mech_results.html')
+
+    #request = mechanize.Request(auth_url)
+    #response = mechanize.urlopen(request)
+    #forms = mechanize.ParseResponse(response, backwards_compat=False)
+    #for f in forms:
+    #    print(f)
+    #req user auth end
+    #fetch web service session begin
+    api_sig_hash = unicode('api_key' + api_key + 'method' + 'auth.getToken', "utf-8")
+    api_sig = hashlib.md5(api_sig_hash).hexdigest()
+    url = rootApi + '?method=auth.getSession&api_key=' + api_key +  '&api_sig=' + api_sig + '&token=' + token
+
+    #<input type="submit" class="button confirmButton" value="Yes, allow access">
+    f = open('auth', 'r')
+    username = f.readline()
+    password = f.readline()
+    #print(url) 
+    
+    
+    #login stuff
+    #<input type="text" id="username" name="username" class="LoginBox" style="width:98%;" value="" />
+    #<input type="password" id="password" name="password" value="" class="LoginBox" style="width:98%;" />
+
+
+    #<input type="submit" value="Come on in" name="login"/>
+    
+    #fetch web service session end
 #class user(self):
 #    username = ''
 #    password = ''
