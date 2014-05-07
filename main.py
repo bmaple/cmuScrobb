@@ -42,11 +42,18 @@ def auth():
     #print (username + password)
     api_key = '242fedcf48db479f1584797a4e25d771'
     rootApi = 'http://ws.audioscrobbler.com/2.0/'
+    auth_url = 'http://www.last.fm/api/auth/'
     mysecret =  'f8365bed081c880685acad58866b4939'
+    api_sig = ''
+    token = ''
+    tokenParams = {'method': 'auth.gettoken', 'api_key': api_key}
+    userAuthParams = {'api_key': api_key, 'token': token}
+    sessionParams = {'method': 'auth.getSession', 'api_key': api_key, 'api_sig': api_sig, 'token': token}
+    inJson = '&format=json'
     #api_sig = md5('api_key'+api_key+'method' + 'auth.getSession' +'token')
     
     #get token begin
-    url = rootApi + '?method=auth.gettoken&api_key=' + api_key + '&format=json'
+    url = rootApi + urllib.urlencode(tokenParams) + inJson
     tokenReqJson = urllib2.urlopen(url)#gets auth from user
     tokenJsonString = tokenReqJson.read()
     tokenJson = json.loads(tokenJsonString)
@@ -54,37 +61,30 @@ def auth():
     #get token end
     
     #req user auth begin
-    auth_url = 'http://www.last.fm/api/auth/?' + 'api_key=' + api_key + '&token=' + token
-    #print(auth_url)
+    url = auth_url + urllib.urlencode(userAuthParams)
     br = mechanize.Browser(factory=mechanize.RobustFactory())
     br.set_handle_robots(False)
-    br.open(auth_url)
+    br.open(url)
     br.select_form(nr=1)
     br['username'] = username
     br['password'] = password
     res = br.submit()
     br.select_form(nr=2) 
     res = br.submit()
-    #content = res.read()
-    #with open('mech_results.html', 'w') as f:
-    #    f.write(content)
-    #webbrowser.open('mech_results.html')
+    #req user auth end 
 
     #fetch web service session begin
-    api_sig_hash = 'api_key' + api_key + 'method' + 'auth.getSession'+'token'+ token + mysecret
+    api_sig_hash = 'api_key' + api_key + 'method' + 'auth.getSession' + 'token'+ token + mysecret
     api_sig_hash = api_sig_hash.encode('utf-8')
     api_sig = hashlib.md5(api_sig_hash)
     api_sig = api_sig.hexdigest()
 
-
-    url = rootApi + '?method=auth.getSession&api_key=' + api_key +  '&api_sig=' + api_sig + '&token=' + token + '&format=json'
+    url = rootApi + urllib.urlencode(sessionParams) + inJson
     sessionReqJson = urllib2.urlopen(url)
     sessionJsonString = sessionReqJson.read()
     sessionJson = json.loads(sessionJsonString)
     sessionkey = sessionJson['session']['key']
     #fetch web service session end
-
-
 
 
 #class user(self):
