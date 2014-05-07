@@ -35,8 +35,14 @@ import mechanize
     #sign my calls
 #fix url encodes for url
 def auth():
+    #f = open('auth', 'r')
+    username = ''
+    password = ''
+    #f.close()
+    #print (username + password)
     api_key = '242fedcf48db479f1584797a4e25d771'
     rootApi = 'http://ws.audioscrobbler.com/2.0/'
+    mysecret =  'f8365bed081c880685acad58866b4939'
     #api_sig = md5('api_key'+api_key+'method' + 'auth.getSession' +'token')
     
     #get token begin
@@ -54,48 +60,33 @@ def auth():
     br.set_handle_robots(False)
     br.open(auth_url)
     br.select_form(nr=1)
-    br['username'] = ''
-    br['password'] = ''
+    br['username'] = username
+    br['password'] = password
+    res = br.submit()
+    br.select_form(nr=2) 
     res = br.submit()
     #content = res.read()
     #with open('mech_results.html', 'w') as f:
     #    f.write(content)
     #webbrowser.open('mech_results.html')
-    br.select_form(nr=2) 
-    res = br.submit()
-    content = res.read()
-    with open('mech_results.html', 'w') as f:
-        f.write(content)
-    webbrowser.open('mech_results.html')
 
-
-    #<form method="post" action="/api/grantaccess" style="margin-top: 14px"><input name="formtoken" type="hidden" value="ea5d8bd2522c48ef4c2c7bc21992cc5a4ef8dc58"/>            
-
-
-    #<input type="submit" class="button confirmButton" value="Yes, allow access">
-
-    #request = mechanize.Request(auth_url)
-    #response = mechanize.urlopen(request)
-    #forms = mechanize.ParseResponse(response, backwards_compat=False)
-    #for f in forms:
-    #    print(f)
-    #req user auth end
     #fetch web service session begin
-    api_sig_hash = unicode('api_key' + api_key + 'method' + 'auth.getToken', "utf-8")
-    api_sig = hashlib.md5(api_sig_hash).hexdigest()
-    url = rootApi + '?method=auth.getSession&api_key=' + api_key +  '&api_sig=' + api_sig + '&token=' + token
+    api_sig_hash = 'api_key' + api_key + 'method' + 'auth.getSession'+'token'+ token + mysecret
+    api_sig_hash = api_sig_hash.encode('utf-8')
+    api_sig = hashlib.md5(api_sig_hash)
+    api_sig = api_sig.hexdigest()
 
-    
-    
-    
-    
-    f = open('auth', 'r')
-    username = f.readline()
-    password = f.readline()
-    #print(url) 
-    
-    
+
+    url = rootApi + '?method=auth.getSession&api_key=' + api_key +  '&api_sig=' + api_sig + '&token=' + token + '&format=json'
+    sessionReqJson = urllib2.urlopen(url)
+    sessionJsonString = sessionReqJson.read()
+    sessionJson = json.loads(sessionJsonString)
+    sessionkey = sessionJson['session']['key']
     #fetch web service session end
+
+
+
+
 #class user(self):
 #    username = ''
 #    password = ''
