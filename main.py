@@ -1,5 +1,6 @@
 #!/bin/python2
 import sys
+import urllib
 import urllib2
 import hashlib
 import json
@@ -87,22 +88,44 @@ def auth():
     api_sig = getApiSig(api_key, token, mysecret)
     sessionKey = getSession(rootApi, api_key, api_sig, token)
 
-
-#class curPlaying(self):
-    
+    return {'api_key': api_key, 'api_sig': api_sig, 'sessionKey': sessionKey}
 
 def main(argv):
-    '''if len(argv) < 2:
-        sys.stderr.write("Not recieving data from cmus")
-        return 1
+#    auth_List = []
+    titleList = [] 
+    infoList = []
+    argCount = 1
+    fout = open('cmusOup.txt', 'w')
+    if len(argv) < 2:
+        fout.write("Not recieving data from cmus")
     else:
-        fout = open('cmusOup.txt', 'w')
-        for args in argv:
-           fout.write(args) 
-           fout.write('\n')
-        fout.close()'''
+        for args in argv: #can't enumerate for some reason
+            if argCount >= 2:
+                if argCount % 2 == 0: 
+                    titleList.append(args)
+                else:
+                    infoList.append(args)
+            argCount += 1
+        albumDict = dict(zip(titleList, infoList))
+        songUrl = urllib.urlencode(albumDict)
+        fout.write(songUrl)
+        #for things in fullList:
+        #    fout.write(things[0])
+        #    fout.write(' ')
+        #    fout.write(things[1])
+        #    fout.write('\n')
+        '''for word,definition in albumDict.items():
+            fout.write(word)
+            fout.write(' ')
+            fout.write(definition)
+            fout.write('\n')'''
+        #for things in infoList:
+        #    fout.write(things)
+    fout.close()
+    #auth_List = auth()
 
-    auth()
+#track.scrobble requires api_key api_sig and sk in addition to the other stuff
+#    auth()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
