@@ -43,7 +43,7 @@ def getToken(api_key, rootApi): # needs api key and rootapi url
     tokenJsonString = tokenReqJson.read()
     tokenJson = json.loads(tokenJsonString)
     return tokenJson['token']
-def userAuth(auth_url):
+def userAuth(auth_url, api_key, token):
     username = ''
     password = ''
     userAuthParams = {'api_key': api_key, 'token': token}
@@ -76,24 +76,24 @@ def auth():
     #f.close()
     #print (username + password)
     api_key = '242fedcf48db479f1584797a4e25d771'
-    rootApi = 'http://ws.audioscrobbler.com/2.0/'
-    auth_url = 'http://www.last.fm/api/auth/'
+    rootApi = 'http://ws.audioscrobbler.com/2.0/?'
+    auth_url = 'http://www.last.fm/api/auth/?'
     mysecret =  'f8365bed081c880685acad58866b4939'
     api_sig = ''
     token = ''
     sessionKey = ''
      
     token = getToken(api_key, rootApi)
-    userAuth(auth_url)
+    userAuth(auth_url, api_key, token)
     api_sig = getApiSig(api_key, token, mysecret)
     sessionKey = getSession(rootApi, api_key, api_sig, token)
 
     return {'api_key': api_key, 'api_sig': api_sig, 'sessionKey': sessionKey}
 
 def main(argv):
-#    auth_List = []
     titleList = [] 
     infoList = []
+    authDict = auth()
     argCount = 1
     fout = open('cmusOup.txt', 'w')
     if len(argv) < 2:
@@ -107,22 +107,11 @@ def main(argv):
                     infoList.append(args)
             argCount += 1
         albumDict = dict(zip(titleList, infoList))
-        songUrl = urllib.urlencode(albumDict)
+        urlArgs = dict(albumDict)
+        urlArgs.update(authDict)
+        songUrl = urllib.urlencode(urlArgs)
         fout.write(songUrl)
-        #for things in fullList:
-        #    fout.write(things[0])
-        #    fout.write(' ')
-        #    fout.write(things[1])
-        #    fout.write('\n')
-        '''for word,definition in albumDict.items():
-            fout.write(word)
-            fout.write(' ')
-            fout.write(definition)
-            fout.write('\n')'''
-        #for things in infoList:
-        #    fout.write(things)
     fout.close()
-    #auth_List = auth()
 
 #track.scrobble requires api_key api_sig and sk in addition to the other stuff
 #    auth()
